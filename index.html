@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="TRANSFORM" />
+  <meta name="theme-color" content="#1C1C1E" />
+  <meta name="description" content="30-day muscle building tracker — workouts, meals, water, and daily checks. Works offline." />
+  <title>30-Day Body Transform</title>
+  <link rel="apple-touch-icon" href="icon.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="icon.png" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app-wrap">
+    <canvas id="confetti-canvas" aria-hidden="true"></canvas>
+
+    <!-- Completion -->
+    <div id="screen-completion" class="screen">
+      <div class="screen-inner no-header">
+        <div class="completion-hero">
+          <div class="completion-badge" aria-hidden="true">30</div>
+          <h1>30 days complete</h1>
+          <p id="completion-stats" class="week-summary"></p>
+          <p class="completion-tagline">This is now your lifestyle.</p>
+          <button type="button" class="btn-primary" id="completion-restart" style="margin-top:32px">Restart program</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Home -->
+    <div id="screen-home" class="screen active">
+      <div class="home-top">
+        <div>
+          <p id="home-greeting" class="home-greet">Good morning</p>
+          <p id="home-date" class="home-date"></p>
+        </div>
+        <button type="button" class="icon-btn" id="btn-settings-gear" aria-label="Settings">⚙️</button>
+      </div>
+      <div class="ring-wrap">
+        <svg class="ring-svg" viewBox="0 0 160 160" aria-hidden="true">
+          <circle cx="80" cy="80" r="70" fill="none" stroke="var(--border)" stroke-width="10" />
+          <circle id="ring-progress" cx="80" cy="80" r="70" fill="none" stroke="var(--brand-gold)" stroke-width="10" stroke-linecap="round" transform="rotate(-90 80 80)" />
+          <text id="ring-day-num" x="80" y="78" text-anchor="middle" class="ring-day-num-svg">1</text>
+          <text id="ring-day-text" x="80" y="102" text-anchor="middle" class="ring-day-sub-svg">of 30 days</text>
+        </svg>
+      </div>
+      <div class="stat-pills">
+        <div class="stat-pill"><span id="pill-streak" class="num">0</span><span class="lbl">🔥 Streak</span></div>
+        <div class="stat-pill"><span id="pill-done" class="num">0</span><span class="lbl">Done</span></div>
+        <div class="stat-pill"><span id="pill-pct" class="num">0%</span><span class="lbl">Complete</span></div>
+      </div>
+      <p id="home-level" class="level-badge"></p>
+      <div id="home-week-summary" class="card week-summary hidden"></div>
+      <div class="quick-grid">
+        <div class="quick-card tap" id="qc-workout" data-nav="workout">
+          <div id="qc-badge" class="badge-type badge-chest">CHEST</div>
+          <div id="qc-workout-type" class="qc-main">CHEST</div>
+          <div id="qc-workout-sub" class="qc-sub">9:00 PM · 0 exercises</div>
+        </div>
+        <div class="quick-card tap" id="qc-water" data-nav="water">
+          <div class="qc-title">💧 Today</div>
+          <div id="qc-water-main" class="qc-main">0 / 8 glasses</div>
+          <div class="progress-track"><div id="qc-water-bar" class="progress-fill" style="width:0%;background:var(--water-color)"></div></div>
+        </div>
+        <div class="quick-card tap" id="qc-diet" data-nav="diet">
+          <div class="qc-title">Protein</div>
+          <div id="qc-diet-main" class="qc-main">0g / 100g</div>
+          <div class="progress-track"><div id="qc-diet-bar" class="progress-fill" style="width:0%;background:var(--success)"></div></div>
+        </div>
+        <div class="quick-card tap" id="qc-cal" data-nav="progress">
+          <div class="qc-title">Progress</div>
+          <div id="qc-cal-main" class="qc-main">0 / 30</div>
+          <div id="qc-dots" class="qc-sub"></div>
+        </div>
+      </div>
+      <button type="button" class="btn-gold" id="btn-open-day">Open Day 1 →</button>
+      <div class="card quote-card" id="home-quote"></div>
+      <div style="height:12px"></div>
+    </div>
+
+    <!-- Today hub -->
+    <div id="screen-today" class="screen">
+      <header class="screen-header">
+        <button type="button" class="back-btn" data-back>‹ Back</button>
+        <div>
+          <h1 class="hdr-title" id="today-title">Day 1</h1>
+          <span class="hdr-sub" id="today-date-sub"></span>
+        </div>
+        <span class="offline-pill" id="offline-pill-today">Offline</span>
+        <span class="invisible-spacer"></span>
+      </header>
+      <div class="screen-inner">
+        <div class="card card-row-chevron tap" id="today-card-workout">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding-right:24px">
+            <div><span id="today-w-badge" class="badge-type badge-chest">CHEST</span> <span style="font-size:17px;font-weight:600">Workout</span></div>
+          </div>
+          <div class="progress-track" style="margin-top:8px"><div id="today-w-bar" class="progress-fill" style="height:6px;width:0%;background:var(--chest-color)"></div></div>
+          <p id="today-w-sub" style="font-size:13px;color:var(--text-secondary);margin:8px 0 0">0 / 0 exercises done</p>
+          <p id="today-countdown" class="countdown-pill" style="margin-top:10px">Workout in —</p>
+        </div>
+        <div class="card card-row-chevron tap" id="today-card-diet">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding-right:24px;font-size:17px;font-weight:600">Diet</div>
+          <p id="today-diet-pro" style="margin:8px 0 4px;font-size:13px;color:var(--text-secondary)">0g / 100g protein</p>
+          <div class="progress-track"><div id="today-diet-bar" class="progress-fill" style="width:0%;background:var(--success)"></div></div>
+          <p id="today-meals-eaten" style="font-size:13px;color:var(--text-secondary);margin-top:8px">0/8 meals eaten</p>
+        </div>
+        <div class="card card-row-chevron tap" id="today-card-water">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding-right:24px;font-size:17px;font-weight:600">Water</div>
+          <p id="today-water-line" style="margin:8px 0;font-size:13px;color:var(--text-secondary)">0 / 8 glasses</p>
+          <div id="today-water-dots" style="display:flex;gap:4px;flex-wrap:wrap"></div>
+        </div>
+        <div class="card card-row-chevron tap" id="today-card-checks">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding-right:24px;font-size:17px;font-weight:600">Daily Checks</div>
+          <p id="today-checks-icons" style="margin-top:12px;font-size:20px"></p>
+        </div>
+        <div class="card card-row-chevron tap" id="today-card-notes">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding-right:24px;font-size:17px;font-weight:600">Notes</div>
+          <p id="today-notes-preview" style="margin-top:8px;font-size:13px;color:var(--text-secondary)">Tap to add today's notes</p>
+        </div>
+        <button type="button" class="btn-gold" id="btn-mark-day-complete" disabled>Mark Day Complete</button>
+      </div>
+    </div>
+
+    <!-- Workout -->
+    <div id="screen-workout" class="screen">
+      <header class="screen-header">
+        <button type="button" class="back-btn" data-back>‹ Back</button>
+        <h1 class="hdr-title" id="workout-header-title">Workout · Day 1</h1>
+        <span class="offline-pill" id="offline-pill-workout">Offline</span>
+        <span class="invisible-spacer"></span>
+      </header>
+      <div class="screen-inner">
+        <div id="workout-badges-row" style="margin-bottom:8px"></div>
+        <div id="workout-countdown" class="countdown-pill">Workout in —</div>
+        <div class="pill-tabs">
+          <button type="button" class="pill-tab active" data-wtab="warmup">Warm-up</button>
+          <button type="button" class="pill-tab" data-wtab="ex">Exercises</button>
+          <button type="button" class="pill-tab" data-wtab="cool">Cool-down</button>
+        </div>
+        <div id="panel-warmup"></div>
+        <div id="panel-ex" class="hidden"></div>
+        <div id="panel-cool" class="hidden"></div>
+      </div>
+    </div>
+
+    <!-- Diet -->
+    <div id="screen-diet" class="screen">
+      <header class="screen-header">
+        <button type="button" class="back-btn" data-back>‹ Back</button>
+        <h1 class="hdr-title" id="diet-header-title">Diet · Day 1</h1>
+        <span class="offline-pill" id="offline-pill-diet">Offline</span>
+        <span class="invisible-spacer"></span>
+      </header>
+      <div class="screen-inner">
+        <div class="card">
+          <p id="diet-pro-main" style="font-size:24px;font-weight:700;margin:0">0g / 100g protein</p>
+          <div class="progress-track" style="margin-top:12px"><div id="diet-pro-bar" class="progress-fill" style="width:0%;background:var(--success)"></div></div>
+          <p id="diet-meals-count" style="font-size:13px;color:var(--text-secondary);margin-top:8px">0 of 8 meals eaten</p>
+        </div>
+        <p class="section-label" style="margin-top:8px">Today's meals</p>
+        <div id="diet-meals-list"></div>
+        <div class="card" style="margin-top:var(--space-md)">
+          <div class="collapsible-h" id="diet-tips-toggle">Diet Tips <span id="diet-tips-chev">▼</span></div>
+          <div class="collapsible-b hidden" id="diet-tips-body"><ul id="diet-tips-ul"></ul></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Water -->
+    <div id="screen-water" class="screen">
+      <header class="screen-header">
+        <button type="button" class="back-btn" data-back>‹ Back</button>
+        <h1 class="hdr-title">Water Tracker</h1>
+        <span class="offline-pill" id="offline-pill-water">Offline</span>
+        <span class="invisible-spacer"></span>
+      </header>
+      <div class="screen-inner">
+        <div class="card">
+          <p id="water-liters" class="water-big" style="margin:0">0.0L</p>
+          <p style="font-size:13px;color:var(--text-secondary);margin:4px 0 12px">of 2.5L daily goal</p>
+          <div class="progress-track"><div id="water-bar" class="progress-fill" style="width:0%;background:var(--water-color)"></div></div>
+          <p id="water-status" style="font-size:13px;margin-top:12px;color:var(--text-secondary)"></p>
+        </div>
+        <div id="water-glasses" class="water-grid"></div>
+        <div class="card">
+          <p style="font-size:13px;font-weight:600;margin:0 0 8px">Next glass tip</p>
+          <p id="water-tip" style="font-size:13px;color:var(--text-secondary);margin:0"></p>
+        </div>
+        <p class="section-label">Reminder times</p>
+        <div id="water-reminders"></div>
+      </div>
+    </div>
+
+    <!-- Progress calendar -->
+    <div id="screen-progress" class="screen">
+      <header class="screen-header">
+        <button type="button" class="back-btn" data-back>‹ Back</button>
+        <h1 class="hdr-title">30-Day Progress</h1>
+        <span class="offline-pill" id="offline-pill-progress">Offline</span>
+        <span class="invisible-spacer"></span>
+      </header>
+      <div class="screen-inner">
+        <div class="cal-stats">
+          <div class="stat-pill"><span id="cal-streak" class="num">0</span><span class="lbl">🔥 Streak</span></div>
+          <div class="stat-pill"><span id="cal-done" class="num">0</span><span class="lbl">Done</span></div>
+          <div class="stat-pill"><span id="cal-perfect" class="num">0</span><span class="lbl">Perfect</span></div>
+        </div>
+        <div id="cal-grid" class="cal-grid"></div>
+        <p class="section-label">Milestones</p>
+        <div class="timeline" id="milestones"></div>
+      </div>
+    </div>
+
+    <!-- Checks -->
+    <div id="screen-checks" class="screen">
+      <header class="screen-header">
+        <button type="button" class="back-btn" data-back>‹ Back</button>
+        <h1 class="hdr-title" id="checks-header-title">Daily Checks · Day 1</h1>
+        <span class="offline-pill" id="offline-pill-checks">Offline</span>
+        <span class="invisible-spacer"></span>
+      </header>
+      <div class="screen-inner">
+        <p class="section-label">Complete all 6 for a perfect day</p>
+        <div id="checks-list"></div>
+      </div>
+    </div>
+
+    <!-- Notes -->
+    <div id="screen-notes" class="screen">
+      <header class="screen-header">
+        <button type="button" class="back-btn" data-back>‹ Back</button>
+        <h1 class="hdr-title" id="notes-header-title">Notes · Day 1</h1>
+        <span class="offline-pill" id="offline-pill-notes">Offline</span>
+        <span class="invisible-spacer"></span>
+      </header>
+      <div class="screen-inner">
+        <p class="section-label">Measurements</p>
+        <div class="card">
+          <label style="font-size:13px;color:var(--text-secondary)">Morning weight (kg)</label>
+          <input type="number" step="0.1" class="field-input" id="note-weight" style="margin-top:8px" inputmode="decimal" />
+        </div>
+        <div class="card">
+          <label style="font-size:13px;color:var(--text-secondary)">Best push-up set (reps)</label>
+          <input type="number" class="field-input" id="note-pushups" style="margin-top:8px" inputmode="numeric" />
+        </div>
+        <p class="section-label">How are you feeling</p>
+        <div class="card energy-wrap">
+          <div class="energy-labels"><span>Low</span><span>High</span></div>
+          <input type="range" min="1" max="10" class="energy-slider" id="note-energy" />
+          <p id="energy-badge" class="energy-badge">Energy: 5</p>
+        </div>
+        <p class="section-label">Reflections</p>
+        <div class="card"><label style="font-size:13px;color:var(--text-secondary)">How I felt today</label><textarea class="field-input" id="note-r1" rows="3" style="margin-top:8px"></textarea></div>
+        <div class="card"><label style="font-size:13px;color:var(--text-secondary)">What I did well</label><textarea class="field-input" id="note-r2" rows="3" style="margin-top:8px"></textarea></div>
+        <div class="card"><label style="font-size:13px;color:var(--text-secondary)">Tomorrow's intention</label><textarea class="field-input" id="note-r3" rows="2" style="margin-top:8px"></textarea></div>
+      </div>
+    </div>
+
+    <!-- Tab bar -->
+    <nav class="tab-bar" id="tab-bar" aria-label="Main">
+      <button type="button" class="tab-btn active" data-tab="home"><span class="tab-icon">🏠</span>Home</button>
+      <button type="button" class="tab-btn" data-tab="today"><span class="tab-icon">📅</span>Today</button>
+      <button type="button" class="tab-btn" data-tab="progress"><span class="tab-icon">📊</span>Progress</button>
+      <button type="button" class="tab-btn" data-tab="settings"><span class="tab-icon">⚙️</span>Settings</button>
+    </nav>
+  </div>
+
+  <div class="sheet-overlay" id="sheet-overlay"></div>
+  <div class="settings-sheet" id="settings-sheet">
+    <div class="sheet-handle-area">
+      <h1 class="hdr-title">Settings</h1>
+    </div>
+    <div class="screen-inner no-header" style="padding-top:0">
+      <p class="section-label">Profile</p>
+      <div class="card">
+        <label style="font-size:13px;color:var(--text-secondary)">Your name</label>
+        <input type="text" class="field-input" id="set-name" style="margin-top:8px" />
+      </div>
+      <p class="section-label">Reminders</p>
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <span style="font-size:17px;font-weight:600">Workout at 9:00 PM</span>
+          <button type="button" class="toggle-ios off" id="tog-notif-workout" aria-label="Workout reminder"><span class="thumb"></span></button>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <span style="font-size:17px;font-weight:600">Dinner at 10:30 PM</span>
+          <button type="button" class="toggle-ios off" id="tog-notif-dinner" aria-label="Dinner reminder"><span class="thumb"></span></button>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:17px;font-weight:600">Sleep snack at 11:30 PM</span>
+          <button type="button" class="toggle-ios off" id="tog-notif-snack" aria-label="Sleep snack reminder"><span class="thumb"></span></button>
+        </div>
+      </div>
+      <p class="section-label">My stats</p>
+      <div class="stat-grid-mini">
+        <div class="card"><span style="font-size:13px;color:var(--text-secondary)">Total workouts</span><br /><strong id="st-total-workouts">0</strong></div>
+        <div class="card"><span style="font-size:13px;color:var(--text-secondary)">Perfect days</span><br /><strong id="st-perfect">0</strong></div>
+        <div class="card"><span style="font-size:13px;color:var(--text-secondary)">Current streak</span><br /><strong id="st-streak">0</strong></div>
+        <div class="card"><span style="font-size:13px;color:var(--text-secondary)">Best streak</span><br /><strong id="st-best">0</strong></div>
+      </div>
+      <p class="section-label">Data</p>
+      <button type="button" class="btn-outline" id="btn-export">Export Progress</button>
+      <p class="section-label">Danger zone</p>
+      <button type="button" class="btn-danger" id="btn-reset">Reset All Data</button>
+      <p class="section-label">About</p>
+      <div class="card" style="font-size:13px;color:var(--text-secondary)">
+        <p style="margin:0 0 8px">Built for your transformation</p>
+        <p style="margin:0">iPhone 13 · 30 Days · Start fresh each morning</p>
+      </div>
+      <button type="button" class="btn-primary" id="btn-close-settings" style="margin-top:24px">Done</button>
+      <div style="height:24px"></div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status"></div>
+  <div id="perfect-banner" class="perfect-banner">Perfect Day Achieved 🏆</div>
+
+  <div id="pwa-install-banner" class="pwa-banner">
+    <h3>Add to your iPhone Home Screen</h3>
+    <p>Safari Share button → Add to Home Screen</p>
+    <button type="button" class="btn-primary" id="pwa-got-it">Got it</button>
+  </div>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
